@@ -1,0 +1,21 @@
+{
+  "fontSize": "10px",
+  "graphVizOptions": {
+    "G": {
+      "rankdir": "LR"
+    }
+  },
+  "excludeRegExp": [
+    "node_modules/.*",
+    "\\.d\\.ts$"
+  ],
+  "fileExtensions": ["ts", "tsx", "js", "jsx"],
+  "detectiveOptions": {
+    "ts": {
+      "skipTypeImports": true
+    },
+    "tsx": {
+      "skipTypeImports": true
+    }
+  }
+} 
