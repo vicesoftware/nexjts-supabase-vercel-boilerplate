@@ -2,6 +2,125 @@
 
 A production-ready boilerplate featuring **Next.js 15**, **Supabase**, and **feature-based architecture** with real-time health monitoring.
 
+## 🔧 Developer Environment Setup
+
+### Prerequisites
+
+- **Node.js 18+** and **pnpm**
+- **Docker** (for local Supabase)
+
+### 1. Clone and Install Dependencies
+
+```bash
+git clone <your-repo>
+cd nextjs-supabase-vercel-boilerplate
+pnpm install
+```
+
+✨ **That's it!** Pre-commit hooks are automatically installed and configured during `pnpm install`.
+
+### 2. What You Get Automatically
+
+When you run `pnpm install`, the following are automatically set up:
+
+- 🎨 **Pre-commit formatting** - Code is auto-formatted with Prettier on every commit
+- 🔍 **Auto-linting** - ESLint fixes issues automatically where possible
+- 🚫 **Quality gates** - Commits fail if there are unfixable linting errors
+- ⚡ **Fast processing** - Only staged files are processed (super quick!)
+
+### 3. Setup Local Supabase
+
+```bash
+# Start local Supabase instance (first time will download Docker images)
+pnpm supabase:start
+
+# You'll see output like this - COPY these values:
+# API URL: http://127.0.0.1:54341
+# anon key: eyJ0eXAiOiJKV1QiLCJhbGciOiJI...
+# service_role key: eyJ0eXAiOiJKV1QiLCJhbGciOiJI...
+```
+
+### 4. Configure Environment Variables
+
+```bash
+# Create your environment file
+cp .env.example .env.local
+
+# Add the values from step 3:
+cat >> .env.local << EOF
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54341
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_from_step_3
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_from_step_3
+EOF
+```
+
+### 5. Start Development Server
+
+```bash
+# Start Next.js on port 3020 (custom port to avoid conflicts)
+pnpm dev
+
+# Open http://localhost:3020 and verify the health check widget works!
+```
+
+### 6. Verify Your Setup (Optional)
+
+Everything should work automatically, but you can verify with these commands:
+
+```bash
+# Check code quality tools
+pnpm validate         # Lint + format check + circular deps
+pnpm check-circular   # Should show "✓ No circular dependencies found!"
+
+# Your first commit will automatically trigger formatting and linting
+git add -A
+git commit -m "Initial setup"  # Watch the magic happen!
+```
+
+### 🎯 Daily Development Workflow
+
+```bash
+# Start your development environment
+pnpm supabase:start   # Start Supabase (if not running)
+pnpm dev              # Start Next.js at http://localhost:3020
+
+# Code away!
+# Your commits will automatically be formatted and linted ✨
+
+# Optional: Run quality checks manually
+pnpm validate         # Check lint + format + circular deps
+
+# End of day cleanup
+pnpm supabase:stop    # Stop Supabase to free resources
+```
+
+### 🚫 Troubleshooting
+
+**Issue: Pre-commit hook not running**
+
+```bash
+# Reinstall hooks (rare but possible)
+pnpm prepare
+```
+
+**Issue: Supabase won't start**
+
+```bash
+# Reset Docker and try again
+docker system prune -f
+pnpm supabase:start
+```
+
+**Issue: ESLint errors during commit**
+
+```bash
+# Fix errors manually, then commit
+pnpm lint:fix  # Auto-fix what's possible
+pnpm lint      # Check remaining errors
+```
+
+---
+
 ## ✨ Features
 
 - 🏗️ **Feature-based architecture** for scalable code organization
@@ -11,55 +130,6 @@ A production-ready boilerplate featuring **Next.js 15**, **Supabase**, and **fea
 - 🔧 **TypeScript** with comprehensive type safety
 - 🎨 **Tailwind CSS** for modern styling
 - 🚀 **Vercel-ready** deployment configuration
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ and pnpm
-- Docker (for local Supabase)
-
-### 1. Clone and Install
-
-```bash
-git clone <your-repo>
-cd nextjs-supabase-vercel-boilerplate
-pnpm install
-```
-
-### 2. Setup Supabase Locally
-
-```bash
-# Initialize Supabase (first time only)
-npx supabase init
-
-# Start local Supabase instance
-npx supabase start
-```
-
-### 3. Configure Environment
-
-```bash
-# Copy environment template
-cp .env.example .env.local
-
-# The .env.local should contain (update with your Supabase output):
-NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54341
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
-```
-
-### 4. Start Development
-
-```bash
-# Start Next.js on port 3020
-pnpm dev
-
-# Or start both Supabase + Next.js together
-pnpm dev:full
-```
-
-Visit **http://localhost:3020** to see your app with the health check widget!
 
 ## 🏗️ Project Structure
 
@@ -119,12 +189,19 @@ pnpm supabase:status  # Check Supabase status
 # Production
 pnpm build            # Build for production
 pnpm start            # Start production server
-pnpm lint             # Run ESLint
 
-# Code Quality
+# Code Quality & Linting
+pnpm lint             # Run ESLint (check only)
+pnpm lint:fix         # Run ESLint and fix issues
+pnpm format           # Format code with Prettier
+pnpm format:check     # Check if code is formatted (CI)
+pnpm validate         # Run all checks: lint + format + circular deps
+pnpm fix              # Fix all auto-fixable issues: lint + format
+
+# Dependency Analysis
 pnpm check-circular   # Check for circular dependencies (madge)
-pnpm deps-tree        # Show dependency tree structure
 pnpm deps             # Export dependencies as JSON
+pnpm prepare          # Setup husky git hooks (automatic on install)
 ```
 
 ## 🏛️ Architecture Principles

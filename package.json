@@ -19,7 +19,7 @@
     "supabase:start": "npx supabase start",
     "supabase:stop": "npx supabase stop",
     "supabase:status": "npx supabase status",
-    "prepare": "husky"
+    "prepare": "husky && echo 'pnpm lint-staged' > .husky/pre-commit && chmod +x .husky/pre-commit"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
