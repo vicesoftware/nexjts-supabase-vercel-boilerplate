@@ -1,6 +1,38 @@
-# NextJS + Supabase Vercel Boilerplate
+# NextJS + Supabase Vercel Boilerplate <!-- omit in toc -->
 
-A production-ready boilerplate featuring **Next.js 15**, **Supabase**, and **feature-based architecture** with real-time health monitoring.
+A production-ready boilerplate featuring **Next.js 15**, **Supabase**, and **feature-based architecture** with real-time health monitoring and activity tracking.
+
+- [🔧 Developer Environment Setup](#-developer-environment-setup)
+  - [Prerequisites](#prerequisites)
+  - [1. Clone and Install Dependencies](#1-clone-and-install-dependencies)
+  - [2. What You Get Automatically](#2-what-you-get-automatically)
+  - [3. Setup Local Supabase](#3-setup-local-supabase)
+  - [4. Configure Environment Variables](#4-configure-environment-variables)
+  - [5. Run Database Migrations](#5-run-database-migrations)
+  - [6. Start Development Server](#6-start-development-server)
+  - [7. Verify Your Setup (Optional)](#7-verify-your-setup-optional)
+  - [🎯 Daily Development Workflow](#-daily-development-workflow)
+  - [🚫 Troubleshooting](#-troubleshooting)
+- [✨ Features](#-features)
+- [🏗️ Project Structure](#️-project-structure)
+- [🎯 Features Overview](#-features-overview)
+  - [🏥 Health Check (`/features/health-check/`) - Traditional API Pattern](#-health-check-featureshealth-check---traditional-api-pattern)
+  - [🎯 Activity Feed (`/features/activities/`) - Direct Supabase Pattern](#-activity-feed-featuresactivities---direct-supabase-pattern)
+  - [🎨 Architecture Showcase](#-architecture-showcase)
+- [📜 Available Scripts](#-available-scripts)
+- [🏛️ Architecture Principles](#️-architecture-principles)
+- [📦 Barrel Export Strategy](#-barrel-export-strategy)
+  - [What are Barrel Exports?](#what-are-barrel-exports)
+  - [Our Barrel Export Standards](#our-barrel-export-standards)
+  - [Benefits](#benefits)
+  - [Tree Shaking Compatibility](#tree-shaking-compatibility)
+  - [Avoiding Circular References](#avoiding-circular-references)
+  - [Import Hierarchy](#import-hierarchy)
+- [➕ Adding New Features](#-adding-new-features)
+- [🐳 Custom Port Configuration](#-custom-port-configuration)
+- [🚀 Deploy on Vercel](#-deploy-on-vercel)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [📚 Learn More](#-learn-more)
 
 ## 🔧 Developer Environment Setup
 
@@ -54,16 +86,29 @@ SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_from_step_3
 EOF
 ```
 
-### 5. Start Development Server
+### 5. Run Database Migrations
+
+```bash
+# Apply database migrations (creates activities table with sample data)
+pnpm supabase:migrate
+
+# Alternatively, reset the entire database (if needed)
+pnpm supabase:reset
+```
+
+### 6. Start Development Server
 
 ```bash
 # Start Next.js on port 3020 (custom port to avoid conflicts)
 pnpm dev
 
-# Open http://localhost:3020 and verify the health check widget works!
+# Open http://localhost:3020 and verify both features work:
+# - Health check widget shows "healthy" status
+# - Activity feed displays sample activities
+# - Add activity form creates new entries in real-time!
 ```
 
-### 6. Verify Your Setup (Optional)
+### 7. Verify Your Setup (Optional)
 
 Everything should work automatically, but you can verify with these commands:
 
@@ -127,6 +172,7 @@ pnpm lint      # Check remaining errors
 - ⚡ **Next.js 15** with App Router and Turbopack
 - 🗄️ **Supabase** for database, auth, and real-time features
 - 📊 **Real-time health monitoring** widget with SWR
+- 🎯 **Activity tracking** with real-time feeds and direct database operations
 - 🔧 **TypeScript** with comprehensive type safety
 - 🎨 **Tailwind CSS** for modern styling
 - 🚀 **Vercel-ready** deployment configuration
@@ -141,9 +187,13 @@ src/
 │   ├── layout.tsx
 │   └── page.tsx
 ├── features/              # Feature-based modules
-│   └── health-check/      # Health monitoring feature
-│       ├── components/    # Feature-specific components
-│       ├── types.ts       # Feature-specific types
+│   ├── health-check/      # Health monitoring feature
+│   │   ├── components/    # Feature-specific components
+│   │   ├── types.ts       # Feature-specific types
+│   │   └── index.ts       # Barrel exports
+│   └── activities/        # Activity tracking feature
+│       ├── components/    # Activity feed & form components
+│       ├── types.ts       # Activity-related types
 │       └── index.ts       # Barrel exports
 ├── lib/                   # Shared utilities
 │   └── database/          # Database clients and utilities
@@ -152,14 +202,16 @@ src/
 
 ## 🎯 Features Overview
 
-### Health Check (`/features/health-check/`)
+This boilerplate demonstrates **two complementary patterns** for building features with Supabase:
 
-A real-time health monitoring system that:
+### 🏥 Health Check (`/features/health-check/`) - Traditional API Pattern
 
-- ✅ Checks database connectivity
-- ✅ Provides API endpoint status
-- ✅ Offers real-time polling with SWR
-- ✅ Shows response times and environment info
+A real-time health monitoring system that showcases traditional API-based architecture:
+
+- ✅ **Custom API endpoints** with Next.js route handlers
+- ✅ **SWR for data fetching** with automatic polling and caching
+- ✅ **Server-side logic** for system health checks
+- ✅ **Real-time polling** with configurable intervals
 
 **Components:**
 
@@ -174,6 +226,60 @@ A real-time health monitoring system that:
 - `HealthStatus` - Basic health check response
 - `HealthCheckResponse` - Extended response with check details
 
+**Pattern:** Traditional client → API → database flow
+
+---
+
+### 🎯 Activity Feed (`/features/activities/`) - Direct Supabase Pattern
+
+A real-time activity tracking system that demonstrates Supabase's "free CRUD" capabilities:
+
+- ✅ **Direct database operations** - No custom API routes needed
+- ✅ **Real-time subscriptions** via WebSocket for instant updates
+- ✅ **Client-side CRUD** with immediate UI feedback
+- ✅ **Form handling** with optimistic updates
+
+**Components:**
+
+- `ActivityFeed` - Real-time activity list with live subscriptions
+- `AddActivityForm` - Create new activities with validation
+
+**Database:**
+
+- `activities` table with RLS policies enabled
+- Real-time subscriptions for INSERT/UPDATE/DELETE operations
+- 12 domain-focused seed activities (User actions, system events, data changes)
+
+**Types:**
+
+- `Activity` - Main activity record interface
+- `ActivityType` - Union type for activity categories
+- `CreateActivityRequest` - Activity creation payload
+
+**Pattern:** Client → Supabase directly (bypassing custom APIs)
+
+---
+
+### 🎨 Architecture Showcase
+
+The boilerplate demonstrates both patterns to show when to use each:
+
+**Use Custom APIs (Health Check) when:**
+
+- Complex server-side logic required
+- Need to aggregate data from multiple sources
+- System monitoring and diagnostics
+- Authentication and authorization logic
+
+**Use Direct Supabase (Activities) when:**
+
+- Simple CRUD operations
+- Real-time data synchronization needed
+- Form submissions and user interactions
+- Rapid prototyping and development
+
+**Result:** You get the "20% skill that covers 80% of features" for both AI Agents and developers!
+
 ## 📜 Available Scripts
 
 ```bash
@@ -185,6 +291,8 @@ pnpm dev:full         # Start both Supabase + Next.js
 pnpm supabase:start   # Start local Supabase
 pnpm supabase:stop    # Stop local Supabase
 pnpm supabase:status  # Check Supabase status
+pnpm supabase:migrate # Apply database migrations
+pnpm supabase:reset   # Reset database (destructive)
 
 # Production
 pnpm build            # Build for production
